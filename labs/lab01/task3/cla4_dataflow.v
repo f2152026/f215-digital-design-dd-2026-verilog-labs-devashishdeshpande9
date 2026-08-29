@@ -12,7 +12,22 @@
 //   assign #(2) c3   = ... (same pattern, one more term)
 //   assign #(2) cout = ... (same pattern, one more term)
 //   assign #(2) sum  = p ^ {c3, c2, c1, cin};
+module FA_Gate(
+  input  a,
+  input  b,
+  input  cin,
+  output sum,
+  output cout
+);
+  wire ps, pc1, pc2;
 
+  xor #(1,2) (ps,  a,   b);
+  and #(1,2) (pc1, a,   b);
+  xor #(1,2) (sum, cin, ps);
+  and #(1,2) (pc2, cin, ps);
+  or  #(1,2) (cout, pc1, pc2);
+
+endmodule
 module cla4_dataflow(
   input  [3:0] a,
   input  [3:0] b,
@@ -25,5 +40,24 @@ module cla4_dataflow(
   wire c1, c2, c3;
 
   // TODO: your dataflow (assign) statements go here.
+
+  // Propagate and Generate
+    assign p = a ^ b;
+    assign g = a & b;
+
+  // Carry Look-Ahead equations
+    assign c1 = g[0] | (p[0] & cin);
+
+    assign c2 = g[1] | (p[1] & g[0]) | (p[1] & p[0] & cin);
+
+    assign c3 = g[2] | (p[2] & g[1]) | (p[2] & p[1] & g[0]) | (p[2] & p[1] & p[0] & cin);
+
+    assign cout = g[3] | (p[3] & g[2]) | (p[3] & p[2] & g[1]) | (p[3] & p[2] & p[1] & g[0]) | (p[3] & p[2] & p[1] & p[0] & cin);
+
+  // Sum
+    assign sum[0] = p[0] ^ cin;
+    assign sum[1] = p[1] ^ c1;
+    assign sum[2] = p[2] ^ c2;
+    assign sum[3] = p[3] ^ c3;
 
 endmodule
