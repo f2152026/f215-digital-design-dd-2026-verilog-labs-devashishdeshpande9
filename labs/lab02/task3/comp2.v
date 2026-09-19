@@ -21,3 +21,4 @@ module comp2 (
   assign Q = (A < B);
 
 endmodule
+
